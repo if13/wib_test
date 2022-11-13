@@ -24,6 +24,8 @@ def insert_db_data1(n):
        
     conn.commit()
     
+insert_db_data1(200)
+    
 
 # print('------')
 sel = cursor.execute('select "userId" from "public"."Users"')
@@ -42,23 +44,7 @@ def insert_db_data2(n):
                                
     conn.commit()
     
-#insert_db_data2(1000)
+insert_db_data2(1000)
 
 sel = cursor.execute('select * from public."Purchases"')
 print(cursor.fetchall())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
