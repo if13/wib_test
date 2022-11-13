@@ -1,0 +1,107 @@
+
+/* А) какую сумму в среднем в месяц тратит:
+- пользователи в возрастном диапазоне от 18 до 25 лет включительно */
+
+SELECT "public"."Purchases"."userId"                 AS USER,
+       "public"."Users"."age"                          AS AGE,
+       AVG("public"."Items"."price")                   AS PRICE,
+       date_part('month', "public"."Purchases"."date") AS MONTH
+FROM  "public"."Purchases"
+JOIN "public"."Users" ON "public"."Purchases"."userId" = "public"."Users"."userId"
+JOIN "public"."Items" ON "public"."Purchases"."itemId" = "public"."Items"."itemId"
+
+WHERE "public"."Users"."age" >= 18 AND "public"."Users"."age" <= 25
+
+GROUP BY date_part('month', "public"."Purchases"."date") ,
+	"public"."Purchases"."userId",
+	"public"."Users"."age"
+ORDER BY "public"."Purchases"."userId", "public"."Users"."age"
+
+/* А) какую сумму в среднем в месяц тратит:
+- пользователи в возрастном диапазоне от 26 до 35 лет включительно*/
+SELECT "public"."Purchases"."userId"                 AS USER,
+       "public"."Users"."age"                          AS AGE,
+       AVG("public"."Items"."price")                   AS PRICE,
+       date_part('month', "public"."Purchases"."date") AS MONTH
+FROM  "public"."Purchases"
+JOIN "public"."Users" ON "public"."Purchases"."userId" = "public"."Users"."userId"
+JOIN "public"."Items" ON "public"."Purchases"."itemId" = "public"."Items"."itemId"
+
+WHERE "public"."Users"."age" >= 26 AND "public"."Users"."age" <= 35
+
+GROUP BY date_part('month', "public"."Purchases"."date") ,
+	"public"."Purchases"."userId",
+	"public"."Users"."age"
+ORDER BY "public"."Purchases"."userId", "public"."Users"."age"
+
+
+/* Б) в каком месяце года выручка от пользователей в возрастном диапазоне 35+ самая большая */
+WITH
+f as (SELECT  SUM("public"."Items"."price") AS PRICE,
+        to_char("public"."Purchases"."date", 'yyyy-mm') AS date
+FROM  "public"."Purchases"
+JOIN "public"."Users" ON "public"."Purchases"."userId" = "public"."Users"."userId"
+JOIN "public"."Items" ON "public"."Purchases"."itemId" = "public"."Items"."itemId"
+
+WHERE "public"."Users"."age" >= 35
+GROUP BY  to_char("public"."Purchases"."date", 'yyyy-mm')
+ORDER BY PRICE DESC
+LIMIT 1)
+
+select date
+from f
+
+
+/* В) какой товар обеспечивает  наибольший вклад в выручку за последний год */
+with
+f as (
+	SELECT  SUM("public"."Items"."price"),
+		"public"."Purchases"."itemId"
+
+	FROM  "public"."Purchases"
+	LEFT JOIN "public"."Users" ON "public"."Purchases"."userId" = "public"."Users"."userId"
+	LEFT JOIN "public"."Items" ON "public"."Purchases"."itemId" = "public"."Items"."itemId"
+
+	where date_part('year', "public"."Purchases"."date") =
+		(SELECT MAX(date_part('year', "public"."Purchases"."date")) as year
+		FROM  "public"."Purchases")
+
+	GROUP BY  "public"."Purchases"."itemId"
+	ORDER BY sum DESC
+	limit 1)
+
+select "f"."itemId"
+from f
+
+
+/* Г) топ-3 товаров по выручке и их доля в общей выручке за любой год */
+with
+f as (
+	SELECT  SUM("public"."Items"."price"),
+		"public"."Purchases"."itemId"
+
+	FROM  "public"."Purchases"
+	LEFT JOIN "public"."Users" ON "public"."Purchases"."userId" = "public"."Users"."userId"
+	LEFT JOIN "public"."Items" ON "public"."Purchases"."itemId" = "public"."Items"."itemId"
+
+	GROUP BY  "public"."Purchases"."itemId"
+	ORDER BY sum DESC
+	limit 3)
+
+select "f"."itemId"
+from f
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
